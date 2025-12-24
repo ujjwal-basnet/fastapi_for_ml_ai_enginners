@@ -1,0 +1,1 @@
+I plan to add a complete fastapi guide on fastapi of AI / ml enginners 
