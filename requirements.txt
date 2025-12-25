@@ -5,3 +5,5 @@ pydantic
 uvicorn
 notebook
 python-dotenv
+SQLAlchemy
+psycopg2-binary
