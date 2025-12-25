@@ -1,5 +1,6 @@
+from fastapi.responses import RedirectResponse
 from pydantic import BaseModel, validator
-from fastapi import FastAPI
+from fastapi import FastAPI, status
 
 class UserCreate(BaseModel):
     username: str
@@ -20,6 +21,10 @@ app = FastAPI()
 @app.post("/users")
 async def create_user_controller(user: UserCreate):
     return {"username": user.username, "message": "Account successfully created"}
+
+@app.get("/" , include_in_schema=False)
+def dos_redirect_controller():
+    return RedirectResponse(url="/docs", status_code=status.HTTP_303_SEE_OTHER)
 
 if __name__ == "__main__":
     import uvicorn
