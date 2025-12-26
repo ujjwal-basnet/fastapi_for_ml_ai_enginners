@@ -19,6 +19,6 @@ notebook for model serving
     
     - ui (streamlit)
         use streamlit for ui 
-        [ui](genai/streamlit_ui.py)
+        [ui](genai/client.py)
     
    
