@@ -7,3 +7,10 @@ notebook
 python-dotenv
 SQLAlchemy
 psycopg2-binary
+transformers
+torch
+streamlit
+diffusers
+accelerate
+safetensors
+pillow
