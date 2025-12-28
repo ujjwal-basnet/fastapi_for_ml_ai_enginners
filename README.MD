@@ -7,10 +7,11 @@ completed till now :
 - [ml_prediction](prediction_with_ml_model) contains **bitcoin** price prediction machine leanring model 
     - also contians notebook for ml models under notebook section
 
-- [genai](genai) 
--  contains genai stuff
+- [genai](genai basic) 
+-  contains genai basic  stuff
 notebook for model serving 
     -[serve-language-model(basic)](genai/serving_language_model.ipynb)
+    -[serve generating audio  (basic)](genai/audio_signals.ipynb)
 
     - models (real code on how to recive prompt and llm response)
        [model](genai/models.py)
