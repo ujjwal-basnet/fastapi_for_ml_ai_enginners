@@ -1,10 +1,14 @@
+from transformers import AutoProcessor, AutoModel, BarkProcessor, BarkModel 
 import torch 
+from schemas import VoicePresets
 from transformers import Pipeline, pipeline
+import numpy as np 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 system_prompt= "you are an ai helper , you only answer in 10 words"
 prompt= "what is numpy"
 
-
+device= "cpu"
 def load_text_model(device= "cpu"):
     pipe = pipeline(
         "text-generation",
@@ -35,6 +39,19 @@ def generate_text(pipe: Pipeline , prompt:str, temperature: float=0.7) -> str:
     output= prediction[0]['generated_text'].split('</s>\n<|assistant|>\n')[-1]
     return output
 
+def load_audio_model() -> tuple[BarkProcessor, BarkModel]:
+    processor=  AutoProcessor.from_pretrained("suno/bark-small")
+    model = AutoModel.from_pretrained("suno/bark-small")
+    return processor, model
+
+def generate_audio(
+    processor: BarkProcessor,model: BarkModel, prompt: str,
+    preset: VoicePresets) -> tuple[np.array, int]:
+
+    inputs = processor(text=[prompt], return_tensors="pt",voice_preset=preset)
+    output = model.generate(**inputs, do_sample=True).cpu().numpy().squeeze()
+    sample_rate = model.generation_config.sample_rate
+    return output, sample_rate
 
 if __name__ == "__main__":
     model= load_text_model(device="cuda")
