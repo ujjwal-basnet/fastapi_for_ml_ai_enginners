@@ -1,37 +1,51 @@
 import streamlit as st
-import requests 
+import requests
+import io
 
-st.title("FastAPI chatbot")
+st.title("FastAPI Chatbot")
 
-#Checks if messages exists in the session state, If not, it initializes st.session_state.messages
+# Initialize session state
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
+# Display previous messages
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        content = message["content"]
+        if isinstance(content, bytes):
+            st.audio(io.BytesIO(content), format='audio/wav')  # Wrap bytes in BytesIO
+        else:
+            st.markdown(content)
 
-for message in st.session_state.messages: #Loops over all messages stored in st.session_state.messages
-    with st.chat_message(message["role"]):  # st.chat_message(message["role"]) creates a chat bubble for each message
-        st.markdown(message["content"]) # display message insided chat bubble
+# Chat input
+prompt = st.chat_input("Ask Something")
+response_type = st.selectbox("Choose AI reply type", ["Text", "Audio"])
 
-prompt = st.chat_input("Ask Someting") #  creates chat input box
+if prompt:
+    # Show user message immediately
+    st.chat_message("user").text(prompt)
+    st.session_state.messages.append({"role": "user", "content": prompt})
 
+    # Step 1: Generate text
+    text_response = requests.get("http://localhost:8000/generate/text", params={"prompt": prompt})
+    text_response.raise_for_status()
+    ai_text = text_response.text
 
-if prompt: # Checks if the user entered something 
-    st.session_state.messages.append({"role" : "user", "content" : prompt}) ## it just save msg immediatly in session state , but if you end code here and run , you you type 
-    # hellow , it wont show , and types hi -> it will show previoud msg , because , first ui render in loop and then msg 
+    # Step 2: Generate AI  audio  reply
+    if response_type == "Text":
+        ai_reply = ai_text
+    else:
+        audio_response = requests.get("http://localhost:8000/generate/audio", params={"prompt": ai_text})
+        audio_response.raise_for_status()
+        ai_reply = audio_response.content
 
-    with st.chat_message("user"): ##Create a chat bubble for the current user message 
-        st.text(prompt) # display msg immediatly
+    # Show assistant message
+    with st.chat_message("assistant"):
+        if response_type == "Text":
+            st.markdown(ai_text)
+        else:
+            st.markdown(ai_text)
+            st.audio(io.BytesIO(ai_reply), format='audio/wav')  # Wrap bytes in BytesIO
 
-    response= requests.get(f"http://localhost:8000/generate/text", 
-                    params= {"prompt" : prompt})
-    response.raise_for_status()
-
-    with st.chat_message("assistant"): ## asistant measn just yellow chat bupple like dp 
-        st.markdown(response.text)
-
-
-
-################## please run main.py first and then , it use response form main.py ######## 
-  ### to run 
-  # command : streamlit run ./genai/streamlit_ui.py 
-  # on  terminal 
+    # Save assistant message in session state
+    st.session_state.messages.append({"role": "assistant", "content": ai_reply})
